@@ -143,6 +143,10 @@
             z-index: 1;
         }
         .grid-tip { text-align:center; font-size:12px; color:#c58; margin-bottom:20px; position:relative; z-index:1; }
+        .day-chips { display:flex; gap:12px; }
+        .day-chip { flex:1; text-align:center; padding:15px 0; border:2px solid #eee; border-radius:15px; font-size:16px; font-weight:bold; color:#333; cursor:pointer; transition:all .25s; }
+        .day-chip:hover { border-color:#ff6b9d; }
+        .day-chip.active { background:#ff6b9d; color:#fff; border-color:#ff6b9d; }
         .item {
             background: #fff;
             border: 2px solid #eee;
@@ -295,8 +299,12 @@
         <div class="title">所以...你什么时候有空？</div>
         <div class="subtitle">只开放这个月的 7、8、9 号，挑一天吧</div>
         <div class="form-group">
-            <label class="form-label">选一天（7 / 8 / 9 号）</label>
-            <input type="date" class="form-input" id="dateInput" required>
+            <label class="form-label">选一天（本月 7 / 8 / 9 号）</label>
+            <div class="day-chips" id="dayChips">
+                <div class="day-chip" onclick="pickDay(this,7)">7号</div>
+                <div class="day-chip" onclick="pickDay(this,8)">8号</div>
+                <div class="day-chip" onclick="pickDay(this,9)">9号</div>
+            </div>
         </div>
         <div class="form-group">
             <label class="form-label">几点见？</label>
@@ -362,7 +370,7 @@
                 <span class="apply-chip">🫂 抱抱</span>
             </div>
             <p>理由：想和你贴近一点，好好约会。</p>
-            <p class="apply-sign">申请人 ✅</p>
+            <p class="apply-sign">申请人 渣渣辉✅</p>
         </div>
         <div class="btn-group">
             <button class="btn btn-yes" onclick="agreeHug(this)">同意</button>
@@ -400,6 +408,8 @@
     <script>
         const ADMIN_CODE = "2580";
         const STORAGE_KEY = "date_invite_local";
+        // 部署好 Cloudflare Worker 后，把它的网址填在这里（形如 https://xxx.workers.dev）
+        const REPORT_URL = "https://date-reply.yongjun1995-xin.workers.dev";
 
         // 按钮乱跑逻辑
         function makeRunaway(btn){
@@ -438,20 +448,17 @@
         makeRunaway(noBtn);
         makeRunaway(noHug);
 
-        // 日期只允许当月7、8、9
-        (function initDate(){
-            const el = document.getElementById('dateInput');
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth()+1).padStart(2,'0');
-            el.min = `${y}-${m}-07`;
-            el.max = `${y}-${m}-09`;
-            el.addEventListener('change', () => {
-                if(!el.value) return;
-                const day = +el.value.split('-')[2];
-                if(day<7||day>9){ alert('仅可选择本月7/8/9号'); el.value = ''; }
-            })
-        })();
+        // 日期：本月 7/8/9 三选一（按钮，避免手机日历默认选到别的日期报错）
+        const NOW = new Date();
+        const CUR_MONTH = NOW.getMonth() + 1;   // 1-12
+        let selectedDay = 0;
+        function pickDay(el, day){
+            document.querySelectorAll('#dayChips .day-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            selectedDay = day;
+        }
+        // 默认选中 7 号（她仍可改点 8/9）
+        (function(){ const c = document.querySelector('#dayChips .day-chip'); if(c){ c.classList.add('active'); selectedDay = 7; } })();
 
         // 步骤切换
         function nextStep(step){
@@ -524,9 +531,9 @@
 
         // 页面跳转校验
         function goFood(){
-            const d = document.getElementById('dateInput').value;
             const t = document.getElementById('timeInput').value;
-            if(!d||!t){ alert('请先选择日期和时间'); return; }
+            if(!selectedDay){ alert('先选一天（7/8/9 号）吧'); return; }
+            if(!t){ alert('再选个时间哦'); return; }
             nextStep(3);
         }
         function goActivity(){
@@ -539,12 +546,10 @@
         }
 
         // 同意申请，保存数据并展示结果
-        function agreeHug(btn){
+        async function agreeHug(btn){
             btn.disabled = true; btn.textContent = '好耶～';
-            const dateRaw = document.getElementById('dateInput').value;
             const timeRaw = document.getElementById('timeInput').value;
-            const dObj = new Date(dateRaw);
-            const showDate = `${dObj.getMonth()+1}月${dObj.getDate()}日`;
+            const showDate = `${CUR_MONTH}月${selectedDay}日`;
             const foodText = selectedFoods.join('、');
             const actText = selectedActs.join('、');
 
@@ -567,6 +572,17 @@
             let list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             list.push(record);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+            // 上报到 Cloudflare Worker（由它写进 GitHub 的 replies.json）
+            if(REPORT_URL){
+                try{
+                    await fetch(REPORT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(record)
+                    });
+                }catch(e){ console.warn('上报失败', e); }
+            }
 
             noHug.style.display = 'none';
             nextStep(6);
