@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周末约个会吧!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f0e6ff 0%, #ffe6f2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            width: 100%;
+            max-width: 440px;
+            background: #fff;
+            border-radius: 42px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 32px rgba(147, 112, 219, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: #ffe6f2;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 100px;
+            height: 100px;
+            background: #f0e6ff;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: #ffe6f2;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        .btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-yes {
+            background: #ff6b9d;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+        }
+        .btn-yes:hover { filter: brightness(1.03); }
+        .btn-no {
+            background: #fff;
+            color: #333;
+            border: 2px solid #eee;
+            position: relative;
+        }
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        .form-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        .form-input:focus {
+            border-color: #ff6b9d;
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
+        }
+        .grid-tip { text-align:center; font-size:12px; color:#c58; margin-bottom:20px; position:relative; z-index:1; }
+        .item {
+            background: #fff;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .item:hover {
+            border-color: #ff6b9d;
+            transform: translateY(-5px);
+        }
+        .item.active {
+            background: #ff6b9d;
+            color: #fff;
+            border-color: #ff6b9d;
+        }
+        .item-emoji {
+            font-size: 30px;
+            margin-bottom: 5px;
+        }
+        .item-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .btn-yes.full { display: block; width: 100%; position: relative; z-index: 1; }
+        .result-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .result-info {
+            font-size: 17px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .result-emoji {
+            font-size: 50px;
+            margin: 20px 0;
+        }
+        .apply-body {
+            position:relative; z-index:1;
+            background:#fff7fb;
+            border:2px dashed #ffc2d6;
+            border-radius:18px;
+            padding:22px 20px;
+            margin-bottom:26px;
+            text-align:left;
+            color:#555;
+            font-size:15px;
+            line-height:2;
+        }
+        .apply-body p { margin:0 0 6px; }
+        .apply-items { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin:16px 0; }
+        .apply-chip {
+            background:#ff6b9d;
+            color:#fff;
+            padding:10px 22px;
+            border-radius:999px;
+            font-weight:bold;
+            font-size:16px;
+            box-shadow:0 4px 12px rgba(255,107,157,.3);
+        }
+        .apply-sign { text-align:right; color:#ff6b9d; font-weight:bold; margin-top:12px; }
+        .hidden { display: none; }
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 107, 157, 0.85);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+            z-index: 5;
+        }
+        .admin-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px 26px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .admin-panel h3 {
+            margin-bottom: 6px;
+            text-align: center;
+        }
+        .admin-panel .tip { text-align:center; color:#999; font-size:12px; margin-bottom:20px; }
+        .admin-entry { border:1px solid #f0e6ff; border-radius:14px; padding:6px 14px 14px; margin-bottom:14px; }
+        .admin-when { color:#c58; font-size:12px; margin:10px 0; }
+        .admin-item {
+            margin-bottom: 8px;
+            padding: 10px 12px;
+            background: #faf7ff;
+            border-radius: 10px;
+            font-size:14px;
+        }
+        .admin-empty { text-align:center; color:#999; padding:30px 10px; line-height:1.9; font-size:14px; }
+        .admin-refresh { width:100%; padding:12px; margin-top:6px; border:2px solid #ffe0ec; background:#fff; color:#ff6b9d; border-radius:12px; font-size:14px; font-weight:bold; cursor:pointer; }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 14px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color:#999;
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一步：邀请页 -->
+    <div class="card" id="step1">
+        <div class="avatar">🐶</div>
+        <div class="title">周末约个会吧!</div>
+        <div class="subtitle">系统检测到：对方已经紧张到开始写网页了</div>
+        <div class="btn-group">
+            <button class="btn btn-yes" onclick="nextStep(2)">愿意</button>
+            <button class="btn btn-no" id="noBtn">不要</button>
+        </div>
+    </div>
+
+    <!-- 第二步：时间选择页 -->
+    <div class="card hidden" id="step2">
+        <div class="avatar">📅</div>
+        <div class="title">所以...你什么时候有空？</div>
+        <div class="subtitle">只开放这个月的 7、8、9 号，挑一天吧</div>
+        <div class="form-group">
+            <label class="form-label">选一天（7 / 8 / 9 号）</label>
+            <input type="date" class="form-input" id="dateInput" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">几点见？</label>
+            <input type="time" class="form-input" id="timeInput" required>
+        </div>
+        <button type="button" class="btn btn-yes full" onclick="goFood()">确定时间</button>
+    </div>
+
+    <!-- 第三步：美食选择（无数量上限，多选） -->
+    <div class="card hidden" id="step3">
+        <div class="avatar">🍽️</div>
+        <div class="title">我们吃点什么？</div>
+        <div class="subtitle">挑想吃的美食</div>
+        <div class="grid" id="foodGrid">
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍕</div><div class="item-name">披萨</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍣</div><div class="item-name">寿司</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍲</div><div class="item-name">火锅</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🥩</div><div class="item-name">烤肉</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🥟</div><div class="item-name">早茶</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🥘</div><div class="item-name">炒菜</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍜</div><div class="item-name">螺蛳粉&臊子面</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🦞</div><div class="item-name">小龙虾</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍢</div><div class="item-name">烧烤</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍷</div><div class="item-name">西餐</div></div>
+            <div class="item" onclick="toggleFood(this)"><div class="item-emoji">🍳</div><div class="item-name">我们自己做</div></div>
+            <div class="item" onclick="customFood(this)"><div class="item-emoji">✏️</div><div class="item-name">自定义美食</div></div>
+        </div>
+        <div class="grid-tip">可多选，最多3个，至少选1个</div>
+        <button type="button" class="btn btn-yes full" onclick="goActivity()">确定美食</button>
+    </div>
+
+    <!-- 第四步：活动选择（无数量上限，多选） -->
+    <div class="card hidden" id="step4">
+        <div class="avatar">🎮</div>
+        <div class="title">吃完想做点什么？</div>
+        <div class="subtitle">喜欢的活动</div>
+        <div class="grid" id="actGrid">
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🎬</div><div class="item-name">看电影</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🌿</div><div class="item-name">散步</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">☕️</div><div class="item-name">泡咖啡馆</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🏛️</div><div class="item-name">看展/博物馆</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🛍️</div><div class="item-name">逛街</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🌙</div><div class="item-name">看夜景</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🎨</div><div class="item-name">手工/陶艺</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🎡</div><div class="item-name">潮玩/游乐</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🎤</div><div class="item-name">唱K</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🧩</div><div class="item-name">剧本杀/密室</div></div>
+            <div class="item" onclick="toggleAct(this)"><div class="item-emoji">🏸</div><div class="item-name">运动一下</div></div>
+            <div class="item" onclick="customAct(this)"><div class="item-emoji">✏️</div><div class="item-name">自定义活动</div></div>
+        </div>
+        <div class="grid-tip">可多选，最多3个，至少选1个</div>
+        <button type="button" class="btn btn-yes full" onclick="goHug()">确定活动</button>
+    </div>
+
+    <!-- 第五步：牵手抱抱 申请书 -->
+    <div class="card hidden" id="step5">
+        <div class="avatar">💌</div>
+        <div class="title">约会亲密申请书</div>
+        <div class="apply-body">
+            <p>本人现正式申请，与你达成以下约定：</p>
+            <div class="apply-items">
+                <span class="apply-chip">🤝 牵手</span>
+                <span class="apply-chip">🫂 抱抱</span>
+            </div>
+            <p>理由：想和你贴近一点，好好约会。</p>
+            <p class="apply-sign">申请人 ✅</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-yes" onclick="agreeHug(this)">同意</button>
+            <button class="btn btn-no" id="noHug">不同意</button>
+        </div>
+    </div>
+
+    <!-- 第六步：结果页 -->
+    <div class="card hidden" id="step6">
+        <div class="result-card">
+            <div class="avatar">🐶</div>
+            <div class="result-title">真开心～</div>
+            <div class="result-title">我会准时来接你！</div>
+            <div class="result-emoji">❤️</div>
+            <div class="result-info" id="resultDate"></div>
+            <div class="result-info" id="resultTime"></div>
+            <div class="result-info" id="resultFood"></div>
+            <div class="result-info" id="resultActivity"></div>
+            <div class="result-info" id="resultHug"></div>
+            <div class="result-info" style="margin-top: 20px;">带好胃口，我带好路线～</div>
+        </div>
+    </div>
+
+    <!-- 管理员查看按钮 -->
+    <button class="admin-btn" onclick="showAdminPanel()">🔍</button>
+    <!-- 管理员面板 -->
+    <div class="admin-panel hidden" id="adminPanel">
+        <button class="close-btn" onclick="hideAdminPanel()">×</button>
+        <h3>她的全部选择</h3>
+        <div class="tip">输入密码2580查看 · 同一设备有效</div>
+        <div id="adminList"></div>
+        <button class="admin-refresh" onclick="loadAdmin()">刷新记录</button>
+    </div>
+
+    <script>
+        const ADMIN_CODE = "2580";
+        const STORAGE_KEY = "date_invite_local";
+
+        // 按钮乱跑逻辑
+        function makeRunaway(btn){
+            let escaped = false;
+            function escape(){
+                const r = btn.getBoundingClientRect();
+                const ph = document.createElement('span');
+                ph.style.display = 'inline-block';
+                ph.style.width  = r.width + 'px';
+                ph.style.height = r.height + 'px';
+                btn.parentNode.insertBefore(ph, btn);
+                document.body.appendChild(btn);
+                btn.style.position = 'fixed';
+                btn.style.margin = '0';
+                btn.style.zIndex = '50';
+                btn.style.left = r.left + 'px';
+                btn.style.top  = r.top + 'px';
+                btn.style.transform = 'none';
+                btn.style.transition = 'left 0.28s ease, top 0.28s ease';
+                escaped = true;
+            }
+            function dodge(e){
+                if(e) e.preventDefault();
+                if(!escaped) escape();
+                const pad = 10;
+                const w = btn.offsetWidth, h = btn.offsetHeight;
+                btn.style.left = pad + Math.random() * (window.innerWidth - w - pad*2) + 'px';
+                btn.style.top  = pad + Math.random() * (window.innerHeight - h - pad*2) + 'px';
+            }
+            ['pointerdown','touchstart','mouseenter','mouseover','click'].forEach(ev => {
+                btn.addEventListener(ev, dodge, { passive:false });
+            });
+        }
+        const noBtn = document.getElementById('noBtn');
+        const noHug = document.getElementById('noHug');
+        makeRunaway(noBtn);
+        makeRunaway(noHug);
+
+        // 日期只允许当月7、8、9
+        (function initDate(){
+            const el = document.getElementById('dateInput');
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth()+1).padStart(2,'0');
+            el.min = `${y}-${m}-07`;
+            el.max = `${y}-${m}-09`;
+            el.addEventListener('change', () => {
+                if(!el.value) return;
+                const day = +el.value.split('-')[2];
+                if(day<7||day>9){ alert('仅可选择本月7/8/9号'); el.value = ''; }
+            })
+        })();
+
+        // 步骤切换
+        function nextStep(step){
+            for(let i=1;i<=6;i++) document.getElementById(`step${i}`).classList.add('hidden');
+            document.getElementById(`step${step}`).classList.remove('hidden');
+            if(step >=2) noBtn.style.display = 'none';
+        }
+
+        // ========== 美食多选（最多3个） ==========
+        let selectedFoods = [];
+        function toggleFood(item){
+            const name = item.querySelector('.item-name').textContent;
+            if(item.classList.contains('active')){
+                item.classList.remove('active');
+                selectedFoods = selectedFoods.filter(f=>f!==name);
+            }else{
+                if(selectedFoods.length >= 3){ alert('最多选 3 个哦～'); return; }
+                item.classList.add('active');
+                selectedFoods.push(name);
+            }
+        }
+        function customFood(item){
+            if(item.classList.contains('active')){
+                item.classList.remove('active');
+                selectedFoods = selectedFoods.filter(f=>f!==item.dataset.val);
+                delete item.dataset.val;
+                item.querySelector('.item-name').textContent = '自定义美食';
+                return;
+            }
+            if(selectedFoods.length >= 3){ alert('最多选 3 个哦～'); return; }
+            const input = prompt('输入想吃的美食：');
+            if(!input||!input.trim()) return;
+            const val = input.trim();
+            item.dataset.val = val;
+            item.querySelector('.item-name').textContent = val;
+            item.classList.add('active');
+            selectedFoods.push(val);
+        }
+
+        // ========== 活动多选（最多3个） ==========
+        let selectedActs = [];
+        function toggleAct(item){
+            const name = item.querySelector('.item-name').textContent;
+            if(item.classList.contains('active')){
+                item.classList.remove('active');
+                selectedActs = selectedActs.filter(a=>a!==name);
+            }else{
+                if(selectedActs.length >= 3){ alert('最多选 3 个哦～'); return; }
+                item.classList.add('active');
+                selectedActs.push(name);
+            }
+        }
+        function customAct(item){
+            if(item.classList.contains('active')){
+                item.classList.remove('active');
+                selectedActs = selectedActs.filter(a=>a!==item.dataset.val);
+                delete item.dataset.val;
+                item.querySelector('.item-name').textContent = '自定义活动';
+                return;
+            }
+            if(selectedActs.length >= 3){ alert('最多选 3 个哦～'); return; }
+            const input = prompt('输入想玩的活动：');
+            if(!input||!input.trim()) return;
+            const val = input.trim();
+            item.dataset.val = val;
+            item.querySelector('.item-name').textContent = val;
+            item.classList.add('active');
+            selectedActs.push(val);
+        }
+
+        // 页面跳转校验
+        function goFood(){
+            const d = document.getElementById('dateInput').value;
+            const t = document.getElementById('timeInput').value;
+            if(!d||!t){ alert('请先选择日期和时间'); return; }
+            nextStep(3);
+        }
+        function goActivity(){
+            if(selectedFoods.length < 1){ alert('至少选择一款美食'); return; }
+            nextStep(4);
+        }
+        function goHug(){
+            if(selectedActs.length < 1){ alert('至少选择一项活动'); return; }
+            nextStep(5);
+        }
+
+        // 同意申请，保存数据并展示结果
+        function agreeHug(btn){
+            btn.disabled = true; btn.textContent = '好耶～';
+            const dateRaw = document.getElementById('dateInput').value;
+            const timeRaw = document.getElementById('timeInput').value;
+            const dObj = new Date(dateRaw);
+            const showDate = `${dObj.getMonth()+1}月${dObj.getDate()}日`;
+            const foodText = selectedFoods.join('、');
+            const actText = selectedActs.join('、');
+
+            // 填充结果页面
+            document.getElementById('resultDate').textContent = `约会日期：${showDate}`;
+            document.getElementById('resultTime').textContent = `见面时间：${timeRaw}`;
+            document.getElementById('resultFood').textContent = `美食清单：${foodText}`;
+            document.getElementById('resultActivity').textContent = `活动清单：${actText}`;
+            document.getElementById('resultHug').textContent = `亲密申请：牵手+抱抱 同意`;
+
+            // 存入本地存储
+            const record = {
+                date: showDate,
+                time: timeRaw,
+                food: foodText,
+                activity: actText,
+                hug: '牵手+抱抱 同意',
+                ts: new Date().toISOString()
+            };
+            let list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            list.push(record);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+            noHug.style.display = 'none';
+            nextStep(6);
+        }
+
+        // 管理员面板
+        function showAdminPanel(){
+            const code = prompt('输入管理员密码：');
+            if(code === null) return;
+            if(code.trim() !== ADMIN_CODE){ alert('密码错误'); return; }
+            loadAdmin();
+            document.getElementById('adminPanel').classList.remove('hidden');
+        }
+        function hideAdminPanel(){
+            document.getElementById('adminPanel').classList.add('hidden');
+        }
+        function fmtTime(iso){
+            const d = new Date(iso);
+            const pad = n=>String(n).padStart(2,'0');
+            return `${d.getMonth()+1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+        function loadAdmin(){
+            const box = document.getElementById('adminList');
+            const raw = localStorage.getItem(STORAGE_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            if(!list.length){
+                box.innerHTML = `<div class="admin-empty">暂无填写记录<br>同一台设备打开页面才能读取</div>`;
+                return;
+            }
+            box.innerHTML = list.reverse().map(r=>`
+                <div class="admin-entry">
+                    <div class="admin-when">填写时间：${fmtTime(r.ts)}</div>
+                    <div class="admin-item"><strong>日期：</strong>${r.date}</div>
+                    <div class="admin-item"><strong>时间：</strong>${r.time}</div>
+                    <div class="admin-item"><strong>美食：</strong>${r.food}</div>
+                    <div class="admin-item"><strong>活动：</strong>${r.activity}</div>
+                    <div class="admin-item"><strong>亲密申请：</strong>${r.hug}</div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
