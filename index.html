@@ -336,8 +336,28 @@
         <button type="button" class="btn btn-yes full" onclick="goActivity()">确定美食</button>
     </div>
 
-    <!-- 第四步：活动选择（无数量上限，多选） -->
+    <!-- 第四步：喜欢的礼物（多选，最多3个） -->
     <div class="card hidden" id="step4">
+        <div class="avatar">🎁</div>
+        <div class="title">想要什么小礼物？</div>
+        <div class="subtitle">挑几样你喜欢的</div>
+        <div class="grid" id="giftGrid">
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">🌹</div><div class="item-name">花束</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">🧸</div><div class="item-name">毛绒玩具</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">🌸</div><div class="item-name">香水</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">💄</div><div class="item-name">口红</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">🕯️</div><div class="item-name">香薰蜡烛</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">📿</div><div class="item-name">首饰</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">👟</div><div class="item-name">鞋</div></div>
+            <div class="item" onclick="toggleGift(this)"><div class="item-emoji">📚</div><div class="item-name">图书</div></div>
+            <div class="item" onclick="customGift(this)"><div class="item-emoji">✏️</div><div class="item-name">自定义</div></div>
+        </div>
+        <div class="grid-tip">可多选，最多3个，至少选1个</div>
+        <button type="button" class="btn btn-yes full" onclick="goHug()">确定礼物</button>
+    </div>
+
+    <!-- 第五步：活动选择（多选，最多3个） -->
+    <div class="card hidden" id="step5">
         <div class="avatar">🎮</div>
         <div class="title">吃完想做点什么？</div>
         <div class="subtitle">喜欢的活动</div>
@@ -356,11 +376,11 @@
             <div class="item" onclick="customAct(this)"><div class="item-emoji">✏️</div><div class="item-name">自定义活动</div></div>
         </div>
         <div class="grid-tip">可多选，最多3个，至少选1个</div>
-        <button type="button" class="btn btn-yes full" onclick="goHug()">确定活动</button>
+        <button type="button" class="btn btn-yes full" onclick="goGift()">确定活动</button>
     </div>
 
-    <!-- 第五步：牵手抱抱 申请书 -->
-    <div class="card hidden" id="step5">
+    <!-- 第六步：牵手抱抱 申请书 -->
+    <div class="card hidden" id="step6">
         <div class="avatar">💌</div>
         <div class="title">约会亲密申请书</div>
         <div class="apply-body">
@@ -378,8 +398,8 @@
         </div>
     </div>
 
-    <!-- 第六步：结果页 -->
-    <div class="card hidden" id="step6">
+    <!-- 第七步：结果页 -->
+    <div class="card hidden" id="step7">
         <div class="result-card">
             <div class="avatar">🐶</div>
             <div class="result-title">真开心～</div>
@@ -389,6 +409,7 @@
             <div class="result-info" id="resultTime"></div>
             <div class="result-info" id="resultFood"></div>
             <div class="result-info" id="resultActivity"></div>
+            <div class="result-info" id="resultGift"></div>
             <div class="result-info" id="resultHug"></div>
             <div class="result-info" style="margin-top: 20px;">带好胃口，我带好路线～</div>
         </div>
@@ -462,7 +483,7 @@
 
         // 步骤切换
         function nextStep(step){
-            for(let i=1;i<=6;i++) document.getElementById(`step${i}`).classList.add('hidden');
+            for(let i=1;i<=7;i++) document.getElementById(`step${i}`).classList.add('hidden');
             document.getElementById(`step${step}`).classList.remove('hidden');
             if(step >=2) noBtn.style.display = 'none';
         }
@@ -529,6 +550,37 @@
             selectedActs.push(val);
         }
 
+        // ========== 礼物多选（最多3个） ==========
+        let selectedGifts = [];
+        function toggleGift(item){
+            const name = item.querySelector('.item-name').textContent;
+            if(item.classList.contains('active')){
+                item.classList.remove('active');
+                selectedGifts = selectedGifts.filter(g=>g!==name);
+            }else{
+                if(selectedGifts.length >= 3){ alert('最多选 3 个哦～'); return; }
+                item.classList.add('active');
+                selectedGifts.push(name);
+            }
+        }
+        function customGift(item){
+            if(item.classList.contains('active')){
+                item.classList.remove('active');
+                selectedGifts = selectedGifts.filter(g=>g!==item.dataset.val);
+                delete item.dataset.val;
+                item.querySelector('.item-name').textContent = '自定义';
+                return;
+            }
+            if(selectedGifts.length >= 3){ alert('最多选 3 个哦～'); return; }
+            const input = prompt('想要什么小礼物：');
+            if(!input||!input.trim()) return;
+            const val = input.trim();
+            item.dataset.val = val;
+            item.querySelector('.item-name').textContent = val;
+            item.classList.add('active');
+            selectedGifts.push(val);
+        }
+
         // 页面跳转校验
         function goFood(){
             const t = document.getElementById('timeInput').value;
@@ -538,11 +590,15 @@
         }
         function goActivity(){
             if(selectedFoods.length < 1){ alert('至少选择一款美食'); return; }
+            nextStep(5);
+        }
+        function goGift(){
+            if(selectedActs.length < 1){ alert('至少选择一项活动'); return; }
             nextStep(4);
         }
         function goHug(){
-            if(selectedActs.length < 1){ alert('至少选择一项活动'); return; }
-            nextStep(5);
+            if(selectedGifts.length < 1){ alert('至少选一样小礼物'); return; }
+            nextStep(6);
         }
 
         // 同意申请，保存数据并展示结果
@@ -552,12 +608,14 @@
             const showDate = `${CUR_MONTH}月${selectedDay}日`;
             const foodText = selectedFoods.join('、');
             const actText = selectedActs.join('、');
+            const giftText = selectedGifts.join('、');
 
             // 填充结果页面
             document.getElementById('resultDate').textContent = `约会日期：${showDate}`;
             document.getElementById('resultTime').textContent = `见面时间：${timeRaw}`;
             document.getElementById('resultFood').textContent = `美食清单：${foodText}`;
             document.getElementById('resultActivity').textContent = `活动清单：${actText}`;
+            document.getElementById('resultGift').textContent = `想要礼物：${giftText}`;
             document.getElementById('resultHug').textContent = `亲密申请：牵手+抱抱 同意`;
 
             // 存入本地存储
@@ -566,6 +624,7 @@
                 time: timeRaw,
                 food: foodText,
                 activity: actText,
+                gift: giftText,
                 hug: '牵手+抱抱 同意',
                 ts: new Date().toISOString()
             };
@@ -585,7 +644,7 @@
             }
 
             noHug.style.display = 'none';
-            nextStep(6);
+            nextStep(7);
         }
 
         // 管理员面板
@@ -619,6 +678,7 @@
                     <div class="admin-item"><strong>时间：</strong>${r.time}</div>
                     <div class="admin-item"><strong>美食：</strong>${r.food}</div>
                     <div class="admin-item"><strong>活动：</strong>${r.activity}</div>
+                    <div class="admin-item"><strong>礼物：</strong>${r.gift || '—'}</div>
                     <div class="admin-item"><strong>亲密申请：</strong>${r.hug}</div>
                 </div>
             `).join('');
